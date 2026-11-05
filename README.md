@@ -182,8 +182,8 @@ No Cypher query is included because no query or graph schema is present to verif
 Team member names :
 1. Ismatul Izza 
 2. Bernicca Olivia S
-3. Aghasi Yanda
-4. Berlianti Debby M.
+3. Aghasi Yanda W A
+4. Berlianti Debby M
 
 ## 18. Author and Credits
 
