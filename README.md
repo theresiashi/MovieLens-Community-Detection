@@ -179,7 +179,11 @@ No Cypher query is included because no query or graph schema is present to verif
 
 ## 17. Team Members
 
-Team member names and roles were not available in the repository or project information. Add verified names and contributions here.
+Team member names :
+1. Ismatul Izza 
+2. Bernicca Olivia S
+3. Aghasi Yanda
+4. Berlianti Debby M.
 
 ## 18. Author and Credits
 
