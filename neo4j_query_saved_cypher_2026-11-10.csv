@@ -1,0 +1,179 @@
+name,description,query,id,parentId,isFolder
+01 -  Eksplorasi data movie lens,,"// 01 - VALIDASI DATA MOVIELENS
+ // Memeriksa jumlah film, user, dan rating
+
+MATCH (m:Movie)-[r:Rating]->(u:User)
+RETURN
+    count(r) AS totalRating,
+    count(DISTINCT m) AS totalMovie,
+    count(DISTINCT u) AS totalUser,
+    min(r.rating) AS ratingMinimum,
+    max(r.rating) AS ratingMaksimum,
+    avg(r.rating) AS rataRataRating;
+",0,,false
+Memeriksa distribusi rating,,"// Memeriksa distribusi rating
+
+MATCH (:Movie)-[r:Rating]->(:User)
+RETURN
+    r.rating AS nilaiRating,
+    count(r) AS jumlahRating
+ORDER BY nilaiRating ASC;
+",1,,false
+02a-uji statistika untuk cosine similiarity,,"/// uju statistika untuk cosine similiarity 
+CALL gds.nodeSimilarity.stats(
+    'moviePositive',
+    {
+        similarityMetric: 'COSINE',
+        similarityCutoff: 0.1,
+        topK: 20
+    }
+)
+YIELD
+    nodesCompared,
+    similarityPairs,
+    similarityDistribution,
+    computeMillis
+RETURN
+    nodesCompared,
+    similarityPairs,
+    similarityDistribution,
+    computeMillis;
+",2,,false
+02- Membuat graph dengan relasi G>=4,,"// Membuat graf sementara dengan rating minimal rating >= 4.0 
+MATCH (m:Movie)-[ r:Rating]->( u:User)
+WHERE r.rating >= 4.0 
+WITH gds.graph.project('moviePositive',m,u) AS g 
+RETURN 
+    g.graphName AS graphName,
+    g.nodeCount AS jumlahNode,
+    g.relationshipCount AS jumlahRelasi;
+     
+",3,,false
+03-node_similarity.cypher,,"// menghitung Node similarity (kemiripan movie based on rating) dengan bobot score 
+
+CALL gds.nodeSimilarity.write(
+     'moviePositiveRatings',{
+        similarityMetric : 'COSINE',
+        similarityCutoff : 0.1,
+        topK :20, 
+        writeRelationshipType: 'SIMILAR_TO', 
+        writeProperty: 'score'}
+)
+YIELD
+    nodesCompared,
+    relationshipsWritten
+RETURN
+    nodesCompared,
+    relationshipsWritten
+;
+",4,,false
+04- Membuat relations : similiar to,,"// Membuat relations 
+
+CALL gds.graph.project(
+    'movieSimilarityGraph',
+    'Movie',
+    {
+        SIMILAR_TO: {
+            type: 'SIMILAR_TO',
+            orientation: 'UNDIRECTED',
+            properties: ['score']
+        }
+    }
+)
+YIELD graphName, nodeCount, relationshipCount
+RETURN graphName, nodeCount, relationshipCount;",5,,false
+05-Menghitung Louvain  dalam metode statistik,,"// menghitung jumlah komunitas dan modularity (metriks untuk mengevaluasi seberapa baik suatu jaringan atau graph di bagi menjadi comunity)
+CALL gds.louvain.stats('movieSimilarityGraph',{relationshipWeightProperty: 'score'})
+YIELD
+    communityCount,
+    modularity,
+    modularities,
+    ranLevels,
+    communityDistribution
+RETURN
+    communityCount,
+    modularity,
+    modularities,
+    ranLevels,
+    communityDistribution;",6,,false
+06-simpan hasil community ke DATABASE,,"// simpan hasil community ke DATABASE
+CALL gds.louvain.write(
+    'movieSimilarityGraph',
+    {
+        relationshipWeightProperty: 'score',
+        writeProperty: 'louvainCommunityId'
+    }
+)
+YIELD
+    communityCount,
+    modularity,
+    ranLevels,
+    nodePropertiesWritten
+RETURN
+    communityCount,
+    modularity,
+    ranLevels,
+    nodePropertiesWritten;",7,,false
+"08 - jumlah daftar film dan komunitasnya ",,"//daftar film dan komunitasnya melihat daftar film berdasarkan komunitasnya  
+MATCH (m:Movie)
+WHERE m.louvainCommunityId IS NOT NULL
+RETURN
+    m.movieId AS movieId,
+    m.title AS judulFilm,
+    m.genres AS genres,
+    m.louvainCommunityId AS communityId
+ORDER BY communityId, judulFilm
+LIMIT 100;",8,,false
+09-melihat ringkasan genre setiap komunitas,,"// melihat ringkasan genre setiap komunitas 
+MATCH (m:Movie)
+WHERE m.louvainCommunityId IS NOT NULL
+UNWIND split(coalesce(m.genres, ''), '|') AS genre
+WITH m.louvainCommunityId AS communityId, genre, count(*) AS jumlah
+WHERE genre <> '' AND genre <> '(no genres listed)'
+RETURN
+    communityId,
+    genre,
+    jumlah
+ORDER BY communityId, jumlah DESC;",9,,false
+07-melihat jumlah film dan contoh film dan perkomunitasnya,,"// melihat jumlah film dan contoh film dan perkomunitasnya
+
+
+MATCH (m:Movie)
+WHERE m.louvainCommunityId IS NOT NULL
+WITH
+    m.louvainCommunityId AS communityId,
+    count(m) AS jumlahFilm,
+    collect(m.title) AS daftarFilm
+RETURN
+    communityId,
+    jumlahFilm,
+    daftarFilm[0..10] AS contohFilm
+ORDER BY jumlahFilm DESC
+LIMIT 10;
+
+",10,,false
+Analisis genre pada 10 komunitas terbesar,,"// Analisis genre pada 10 komunitas terbesar
+MATCH (m:Movie)
+WHERE m.louvainCommunityId IS NOT NULL
+WITH
+    m.louvainCommunityId AS communityId,
+    count(m) AS jumlahFilm
+ORDER BY jumlahFilm DESC
+LIMIT 10
+WITH collect(communityId) AS komunitasTerbesar
+
+MATCH (m:Movie)
+WHERE m.louvainCommunityId IN komunitasTerbesar
+UNWIND split(coalesce(m.genres, ''), '|') AS genre
+WITH
+    m.louvainCommunityId AS communityId,
+    genre,
+    count(*) AS jumlahFilm
+WHERE genre <> ''
+  AND genre <> '(no genres listed)'
+RETURN
+    communityId,
+    genre,
+    jumlahFilm
+ORDER BY communityId, jumlahFilm DESC;
+",11,,false
