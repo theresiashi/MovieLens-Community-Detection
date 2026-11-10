@@ -165,25 +165,14 @@ The repository currently contains only the following tracked files:
 
 No scripts, notebooks, data, output files, or screenshots were present at the time this README was prepared. Update this tree as the project implementation is committed.
 
-## 16. Installation and How to Run
 
-There are no documented installation or execution commands because the repository does not currently include source code, a dependency file, or a Neo4j setup/configuration. Do not use generic commands as though they run this project. Add verified instructions here when the implementation is committed, including:
-
-- supported runtime and dependency installation;
-- how to obtain and prepare the dataset;
-- Neo4j version/setup and required configuration (without publishing credentials);
-- the exact commands or notebook sequence to build the graph and run detection;
-- how to reproduce tables and visualizations.
-
-No Cypher query is included because no query or graph schema is present to verify.
-
-## 17. Team Members
+## 16. Team Members
 
 Team member names :
-1. Ismatul Izza 
-2. Bernicca Olivia S
-3. Aghasi Yanda W A
-4. Berlianti Debby M
+1. Ismatul Izza 23031554226
+2. Bernicca Olivia S 23031554176
+3. Aghasi Yanda W A 23031554039
+4. Berlianti Debby M 23031554006
 
 ## 18. Author and Credits
 
