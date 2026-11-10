@@ -118,13 +118,15 @@ The project brief states that most detected communities contain approximately **
 
 For an interpretable analysis, report the community-size distribution (including singleton groups), the largest community and its member movies, and the most common genres within communities. A genre summary can help describe a cluster, but genre overlap should not be assumed to explain the cluster: the proposed edges arise from rating-pattern similarity.
 
-**Visualization placeholder:** Add a screenshot of the Neo4j graph view with nodes colored by the verified community assignment.
+**Visualization placeholder:** AThe following figure illustrates the movie similarity network generated using Neo4j and the Louvain community detection algorithm.
 
-`<!-- Replace this placeholder with a committed image, for example: ![Movie similarity network colored by community](docs/images/community-network.png) -->`
+![Movie Similarity Network](Graph_visualitation.png)
 
-**Community summary placeholder:** Add a chart of community sizes and, where useful, a chart of genre distribution by community.
+*Project Documentation*
 
-`<!-- Replace this placeholder with a committed image, for example: ![Community size distribution](docs/images/community-size-distribution.png) -->`
+For a detailed explanation of the project methodology, implementation, and findings, please refer to the presentation document below.
+
+[View Project Presentation (PDF)](pitch_desk_movie_leans.pdf)
 
 The referenced image files do not currently exist in the repository. Add them before replacing these placeholders with rendered images.
 
